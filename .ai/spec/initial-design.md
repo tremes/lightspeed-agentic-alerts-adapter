@@ -132,11 +132,11 @@ Deterministic: `{alertname}-{namespace}-{fingerprint[:8]}` (see above).
 
 #### Namespace
 
-All Proposals are created in the operator namespace (`openshift-lightspeed`). The alert's source namespace is captured in `spec.targetNamespaces`. The operator controller watches Proposals across all namespaces; using a single namespace simplifies RBAC for the adapter.
+Proposals are created in the alert's source namespace — i.e., the namespace from the alert's `namespace` label. For cluster-scoped alerts with no namespace label, Proposals are created in the operator namespace (`openshift-lightspeed`) as a fallback. The operator controller watches Proposals across all namespaces, so this works without additional configuration. The adapter's ServiceAccount needs Proposal create/list/get RBAC across namespaces (ClusterRole instead of a namespace-scoped Role).
 
 #### spec.targetNamespaces
 
-Extracted from the alert's `namespace` label. If the alert has no namespace label (cluster-scoped alerts), `targetNamespaces` is left empty. The operator grants cluster-scoped RBAC based on the analysis agent's output.
+Set to the alert's `namespace` label (matching the namespace where the Proposal is created). If the alert has no namespace label (cluster-scoped alerts), `targetNamespaces` is left empty. The operator grants cluster-scoped RBAC based on the analysis agent's output.
 
 #### spec.request
 
@@ -296,18 +296,30 @@ subjects:
     namespace: openshift-lightspeed
 ```
 
-**2. Proposal management** — create and list Proposals in `openshift-lightspeed`:
+**2. Proposal management** — create and list Proposals across namespaces:
 
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
+kind: ClusterRole
 metadata:
-  name: lightspeed-agentic-alerts-adapter
-  namespace: openshift-lightspeed
+  name: lightspeed-agentic-alerts-adapter-proposals
 rules:
   - apiGroups: ["agentic.openshift.io"]
     resources: ["proposals"]
     verbs: ["create", "list", "get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: lightspeed-agentic-alerts-adapter-proposals
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: lightspeed-agentic-alerts-adapter-proposals
+subjects:
+  - kind: ServiceAccount
+    name: lightspeed-agentic-alerts-adapter
+    namespace: openshift-lightspeed
 ```
 
 ### Health Probes
@@ -357,7 +369,7 @@ All configurable values are Go constants in the initial implementation. Future i
 | `InitialDelay` | `5 * time.Minute` | Alert must fire this long before creating a Proposal |
 | `CooldownWindow` | `1 * time.Hour` | Minimum time after a terminal Proposal before re-proposing for the same alert |
 | `AlertManagerURL` | `https://alertmanager-main.openshift-monitoring.svc:9093` | AlertManager API base URL |
-| `ProposalNamespace` | `openshift-lightspeed` | Namespace where Proposals are created |
+| `DefaultNamespace` | `openshift-lightspeed` | Namespace for Proposals from cluster-scoped alerts (no namespace label) |
 | `DefaultAgent` | `default` | Agent name for analysis, execution, and verification steps |
 
 ## Future Work
