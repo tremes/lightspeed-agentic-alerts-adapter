@@ -337,7 +337,7 @@ lightspeed-agentic-alerts-adapter/
 │   └── main.go                      # Entrypoint: flags, signal handling, run loop
 ├── internal/
 │   ├── alertmanager/
-│   │   ├── client.go                # AlertManager HTTP client (GET /api/v2/alerts)
+│   │   ├── client.go                # AlertManager client (fetches firing alerts)
 │   │   └── types.go                 # Alert response types
 │   ├── proposal/
 │   │   ├── builder.go               # Alert → Proposal mapping, template rendering
@@ -356,8 +356,8 @@ lightspeed-agentic-alerts-adapter/
 | Dependency | Purpose |
 |-----------|---------|
 | `github.com/openshift/lightspeed-agentic-operator/api` | Typed Proposal CRD Go types |
-| `sigs.k8s.io/controller-runtime/pkg/client` | Typed Kubernetes client for Proposal CRUD |
-| `k8s.io/client-go` | In-cluster config, ServiceAccount auth |
+| `k8s.io/client-go` | In-cluster config, ServiceAccount auth, Kubernetes client for Proposal CRUD |
+| `k8s.io/apimachinery` | Kubernetes API types and utilities |
 
 ## Configuration
 

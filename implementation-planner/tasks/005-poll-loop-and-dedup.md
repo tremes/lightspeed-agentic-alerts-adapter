@@ -44,7 +44,7 @@ Use interfaces for the AlertManager client and Kubernetes client so they can be 
   - Alert missing alertname → skipped with log, other alerts still processed
 
 ### Integration Tests
-- If feasible, use `envtest` (from controller-runtime) to test against a real API server with the Proposal CRD registered. Create a Proposal, verify it appears in the list, check dedup logic works end-to-end.
+- If feasible, use a fake or test Kubernetes client to test against a simulated API server with the Proposal CRD registered. Create a Proposal, verify it appears in the list, check dedup logic works end-to-end.
 
 ### How to Validate
 ```bash
@@ -53,7 +53,7 @@ go test ./internal/poller/... -v
 
 ## Notes
 
-- The Poller needs both an AlertManager client and a Kubernetes client (controller-runtime `client.Client`). Accept these as constructor parameters for testability.
+- The Poller needs both an AlertManager client and a Kubernetes client. Use a `client-go` dynamic client or typed clientset (not controller-runtime) since the adapter is not a controller. Accept these as constructor parameters for testability.
 - For terminal state detection: iterate over `.status.conditions` and check for any condition where `Type` is one of `Completed`, `Failed`, `Escalated`, `Denied` and `Status` is `True`. The condition's `LastTransitionTime` is the timestamp to compare against for cooldown.
 - The poll interval (30s) should be a configurable parameter on the Poller, not a global constant, so tests can use a shorter interval.
 - The design doc says "stateless" — the Poller doesn't cache state between cycles. Each cycle does a fresh fetch + list. The only in-memory state is the poll health flag for the readiness probe.

@@ -35,7 +35,7 @@ All commands should exit 0.
 
 - Key dependencies to add to `go.mod` (they'll be used in later tasks but should be resolvable now):
   - `github.com/openshift/lightspeed-agentic-operator/api` — Proposal CRD types
-  - `sigs.k8s.io/controller-runtime` — typed Kubernetes client
-  - `k8s.io/client-go` — in-cluster config, ServiceAccount auth
+  - `k8s.io/client-go` — in-cluster config, ServiceAccount auth, typed Kubernetes client
+  - `k8s.io/apimachinery` — Kubernetes API types and utilities
 - The Dockerfile runtime stage should use `registry.access.redhat.com/ubi9/ubi-minimal` for OpenShift compatibility.
 - See the "Project Structure" and "Dependencies" sections of the design doc.
