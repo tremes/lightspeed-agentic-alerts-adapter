@@ -1,0 +1,32 @@
+{
+  "eval_id": 2,
+  "eval_name": "vague-cli",
+  "prompt": "Here's a design doc at `implementation-planner/evals/test-design-vague-cli.md` for a Python CLI tool. Please create implementation tasks in `/tmp/logparse-tasks/`.",
+  "assertions": [
+    {
+      "id": "identifies-ambiguities",
+      "text": "The output identifies at least 2 ambiguities or gaps in the design doc before generating tasks",
+      "type": "semantic"
+    },
+    {
+      "id": "states-assumptions",
+      "text": "The output explicitly states assumptions made for unresolved ambiguities",
+      "type": "semantic"
+    },
+    {
+      "id": "produces-task-files",
+      "text": "Task files are actually generated (not just questions asked)",
+      "type": "structural"
+    },
+    {
+      "id": "has-test-plan",
+      "text": "Each task file has a Test Plan section",
+      "type": "structural"
+    },
+    {
+      "id": "reasonable-task-count",
+      "text": "Produces a reasonable number of tasks (3-7 for a CLI tool of this scope)",
+      "type": "semantic"
+    }
+  ]
+}

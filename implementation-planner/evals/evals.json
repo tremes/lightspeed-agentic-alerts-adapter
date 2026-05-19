@@ -1,0 +1,23 @@
+{
+  "skill_name": "implementation-planner",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I have a design doc at `.ai/spec/initial-design.md` that describes a Go adapter component for bridging OpenShift alerts into an agentic system. Break it down into implementation tasks and save them to `.ai/tasks/`.",
+      "expected_output": "A series of numbered markdown task files in .ai/tasks/ covering project scaffolding, AlertManager client, Proposal builder, naming/sanitization, poll loop, health probes, deployment manifests, and RBAC. Tasks should be ordered so each builds on prior ones. The skill should not create tasks for items listed under Future Work.",
+      "files": [".ai/spec/initial-design.md"]
+    },
+    {
+      "id": 2,
+      "prompt": "Here's a design doc at `implementation-planner/evals/test-design-vague-cli.md` for a Python CLI tool. Please create implementation tasks in `/tmp/logparse-tasks/`.",
+      "expected_output": "The skill should ask clarifying questions before generating all tasks — the design doc is missing: output format (text? JSON? HTML?), error handling strategy, what 'large files efficiently' means (streaming? chunking?), CLI argument parsing library choice, and how 'time window' grouping works. After clarification it should produce task files.",
+      "files": ["implementation-planner/evals/test-design-vague-cli.md"]
+    },
+    {
+      "id": 3,
+      "prompt": "I have a small design doc at `implementation-planner/evals/test-design-healthcheck.md` for a Go health check library. Generate implementation tasks in `/tmp/healthcheck-tasks/`.",
+      "expected_output": "Should produce a small number of right-sized tasks (likely 2-4, not 8+). The scope is small — the skill should not over-split into one-function tasks. Expected tasks: project setup + core types, health handler with concurrent check execution, and HTTP handlers with response formatting.",
+      "files": ["implementation-planner/evals/test-design-healthcheck.md"]
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "expectations": [
+    {
+      "text": "Output contains numbered markdown files (NNN-name.md pattern)",
+      "passed": true,
+      "evidence": "Agent described ~12 files with NNN-xxx.md pattern"
+    },
+    {
+      "text": "Tasks are in dependency order: scaffolding before components, components before integration",
+      "passed": false,
+      "evidence": "Insufficient evidence — agent was denied write permissions early and only mentioned file count, not ordering details"
+    },
+    {
+      "text": "Each task file has a Goal section explaining what and why",
+      "passed": false,
+      "evidence": "Cannot verify — no file content available. Prompt asked for 'goal, acceptance criteria, and test plan' but format compliance is unverifiable"
+    },
+    {
+      "text": "Each task file has Acceptance Criteria with verifiable outcomes",
+      "passed": false,
+      "evidence": "Cannot verify — no file content available"
+    },
+    {
+      "text": "Each task file has a Test Plan section describing what to test",
+      "passed": false,
+      "evidence": "Cannot verify — no file content available"
+    },
+    {
+      "text": "No tasks created for items explicitly listed under Future Work in the design doc",
+      "passed": false,
+      "evidence": "Cannot verify — task list not detailed enough to confirm"
+    },
+    {
+      "text": "Tasks cover the core components: AlertManager client, Proposal builder, naming/sanitization, poll loop, health probes",
+      "passed": false,
+      "evidence": "Cannot verify — only partial plan visible"
+    },
+    {
+      "text": "Tasks are framed for an AI agent executor, not for human engineers",
+      "passed": false,
+      "evidence": "No skill guidance on agent framing — baseline prompt mentioned 'engineer' language implicitly"
+    }
+  ],
+  "summary": {
+    "passed": 1,
+    "failed": 7,
+    "total": 8,
+    "pass_rate": 0.125
+  },
+  "timing": {
+    "total_duration_seconds": 90.0
+  },
+  "eval_feedback": {
+    "overall": "Baseline was denied permissions early and provided minimal output. Most assertions cannot be verified."
+  }
+}

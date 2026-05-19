@@ -1,0 +1,37 @@
+{
+  "eval_id": 3,
+  "eval_name": "small-healthcheck",
+  "prompt": "I have a small design doc at `implementation-planner/evals/test-design-healthcheck.md` for a Go health check library. Generate implementation tasks in `/tmp/healthcheck-tasks/`.",
+  "assertions": [
+    {
+      "id": "right-sized",
+      "text": "Produces 2-4 tasks (not over-split for this small scope)",
+      "type": "semantic"
+    },
+    {
+      "id": "numbered-files",
+      "text": "Output contains numbered markdown files (NNN-name.md pattern)",
+      "type": "structural"
+    },
+    {
+      "id": "has-test-plan",
+      "text": "Each task file has a Test Plan section",
+      "type": "structural"
+    },
+    {
+      "id": "has-acceptance-criteria",
+      "text": "Each task file has Acceptance Criteria",
+      "type": "structural"
+    },
+    {
+      "id": "concurrency-covered",
+      "text": "At least one task addresses concurrent check execution and thread safety",
+      "type": "coverage"
+    },
+    {
+      "id": "no-trivial-splits",
+      "text": "No task has only a single trivial acceptance criterion",
+      "type": "semantic"
+    }
+  ]
+}

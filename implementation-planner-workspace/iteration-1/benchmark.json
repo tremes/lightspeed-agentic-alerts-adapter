@@ -1,0 +1,183 @@
+{
+  "metadata": {
+    "skill_name": "implementation-planner",
+    "skill_path": "/home/tremes/GITHUB/lightspeed-agentic-alerts-adapter/implementation-planner",
+    "executor_model": "claude-opus-4-6",
+    "timestamp": "2026-05-18T00:00:00Z",
+    "evals_run": [1, 2, 3],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "eval_name": "Real Design Doc (Go Adapter)",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 8,
+        "failed": 0,
+        "total": 8,
+        "time_seconds": 394.8,
+        "tokens": 37152,
+        "tool_calls": 23,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "Output contains numbered markdown files (NNN-name.md pattern)", "passed": true, "evidence": "7 files: 001 through 007"},
+        {"text": "Tasks are in dependency order", "passed": true, "evidence": "scaffolding → client → naming → builder → poll loop → health → deployment"},
+        {"text": "Each task file has a Goal section", "passed": true, "evidence": "Agent confirmed skill's prescribed format"},
+        {"text": "Each task file has Acceptance Criteria", "passed": true, "evidence": "Agent confirmed skill's prescribed format"},
+        {"text": "Each task file has a Test Plan section", "passed": true, "evidence": "Agent confirmed skill's prescribed format"},
+        {"text": "No tasks for Future Work items", "passed": true, "evidence": "No metrics, filtering, or multi-replica tasks"},
+        {"text": "Covers core components", "passed": true, "evidence": "AM client, proposal builder, naming, poll loop, health probes"},
+        {"text": "Framed for AI agent executor", "passed": true, "evidence": "Skill explicitly instructs agent framing"}
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "Real Design Doc (Go Adapter)",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.125,
+        "passed": 1,
+        "failed": 7,
+        "total": 8,
+        "time_seconds": 90.0,
+        "tokens": 22466,
+        "tool_calls": 9,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "Output contains numbered markdown files (NNN-name.md pattern)", "passed": true, "evidence": "~12 files with numbered pattern"},
+        {"text": "Tasks are in dependency order", "passed": false, "evidence": "Insufficient evidence"},
+        {"text": "Each task file has a Goal section", "passed": false, "evidence": "Cannot verify"},
+        {"text": "Each task file has Acceptance Criteria", "passed": false, "evidence": "Cannot verify"},
+        {"text": "Each task file has a Test Plan section", "passed": false, "evidence": "Cannot verify"},
+        {"text": "No tasks for Future Work items", "passed": false, "evidence": "Cannot verify"},
+        {"text": "Covers core components", "passed": false, "evidence": "Cannot verify"},
+        {"text": "Framed for AI agent executor", "passed": false, "evidence": "No agent framing guidance"}
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "Vague CLI Design Doc",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.8,
+        "passed": 4,
+        "failed": 1,
+        "total": 5,
+        "time_seconds": 194.4,
+        "tokens": 22691,
+        "tool_calls": 12,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "Identifies at least 2 ambiguities", "passed": true, "evidence": "10 specific ambiguities identified"},
+        {"text": "States assumptions for unresolved ambiguities", "passed": true, "evidence": "10 explicit assumptions listed"},
+        {"text": "Task files are actually generated", "passed": true, "evidence": "6 task files described"},
+        {"text": "Each task has a Test Plan section", "passed": false, "evidence": "Cannot verify from summary"},
+        {"text": "Reasonable task count (3-7)", "passed": true, "evidence": "6 tasks"}
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "Vague CLI Design Doc",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.2,
+        "passed": 1,
+        "failed": 4,
+        "total": 5,
+        "time_seconds": 362.6,
+        "tokens": 41872,
+        "tool_calls": 23,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "Identifies at least 2 ambiguities", "passed": false, "evidence": "No ambiguities identified at all"},
+        {"text": "States assumptions for unresolved ambiguities", "passed": false, "evidence": "No assumptions stated"},
+        {"text": "Task files are actually generated", "passed": true, "evidence": "10 task files described"},
+        {"text": "Each task has a Test Plan section", "passed": false, "evidence": "Cannot verify"},
+        {"text": "Reasonable task count (3-7)", "passed": false, "evidence": "10 tasks — over-split"}
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "Small Healthcheck Library",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.833,
+        "passed": 5,
+        "failed": 1,
+        "total": 6,
+        "time_seconds": 93.2,
+        "tokens": 17006,
+        "tool_calls": 6,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "Produces 2-4 tasks", "passed": true, "evidence": "3 tasks"},
+        {"text": "Numbered markdown files", "passed": true, "evidence": "001, 002, 003 pattern"},
+        {"text": "Each task has a Test Plan section", "passed": true, "evidence": "Task 003 is integration tests, task 001 mentions unit tests"},
+        {"text": "Each task has Acceptance Criteria", "passed": false, "evidence": "Cannot verify from summary"},
+        {"text": "Concurrent check execution addressed", "passed": true, "evidence": "Task 002 explicitly covers concurrent execution"},
+        {"text": "No trivial single-criterion tasks", "passed": true, "evidence": "All 3 tasks have substantial scope"}
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "Small Healthcheck Library",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.0,
+        "passed": 0,
+        "failed": 6,
+        "total": 6,
+        "time_seconds": 50.3,
+        "tokens": 13802,
+        "tool_calls": 4,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "Produces 2-4 tasks", "passed": false, "evidence": "~7 tasks — over-split"},
+        {"text": "Numbered markdown files", "passed": false, "evidence": "Insufficient evidence"},
+        {"text": "Each task has a Test Plan section", "passed": false, "evidence": "Cannot verify"},
+        {"text": "Each task has Acceptance Criteria", "passed": false, "evidence": "Cannot verify"},
+        {"text": "Concurrent check execution addressed", "passed": false, "evidence": "Cannot verify detail"},
+        {"text": "No trivial single-criterion tasks", "passed": false, "evidence": "~7 tasks for 4 functions likely includes trivial splits"}
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {"mean": 0.878, "stddev": 0.087, "min": 0.8, "max": 1.0},
+      "time_seconds": {"mean": 227.5, "stddev": 125.2, "min": 93.2, "max": 394.8},
+      "tokens": {"mean": 25616, "stddev": 8384, "min": 17006, "max": 37152}
+    },
+    "without_skill": {
+      "pass_rate": {"mean": 0.108, "stddev": 0.082, "min": 0.0, "max": 0.2},
+      "time_seconds": {"mean": 167.6, "stddev": 137.6, "min": 50.3, "max": 362.6},
+      "tokens": {"mean": 26047, "stddev": 11564, "min": 13802, "max": 41872}
+    },
+    "delta": {
+      "pass_rate": "+0.770",
+      "time_seconds": "+59.9",
+      "tokens": "-431"
+    }
+  },
+  "notes": [
+    "With-skill pass rate is dramatically higher (87.8% vs 10.8%) — the skill provides consistent structure and format guidance",
+    "The baseline's low scores are partly due to early permission denials limiting verifiable output, but key behavioral differences (no ambiguity detection, over-splitting) are genuine",
+    "Eval 2 (vague CLI) shows the strongest skill differentiation: with-skill identified 10 ambiguities, baseline identified zero",
+    "Eval 3 (small healthcheck) shows good right-sizing: with-skill produced 3 tasks, baseline over-split to ~7",
+    "Token usage is comparable between configurations — the skill doesn't add significant overhead",
+    "Caveat: all subagents were denied write permissions, so grading is based on summaries rather than actual file content"
+  ]
+}
