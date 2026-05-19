@@ -1,0 +1,12 @@
+A Kubernetes alert is firing in the cluster.
+Investigate the root cause and propose a remediation.
+
+Alert: {{ .AlertName }}
+Severity: {{ .Severity }}
+Namespace: {{ .Namespace }}
+Summary: {{ .Summary }}
+Description: {{ .Description }}
+
+Labels:
+{{ range $k, $v := .Labels }}  {{ $k }}: {{ $v }}
+{{ end }}
