@@ -1,0 +1,23 @@
+{
+  "skill_name": "implementer",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Implement task 003 (proposal naming). The task file is at implementation-planner/tasks/003-proposal-naming.md and the design doc is at .ai/spec/initial-design.md. Task 001 and 002 are already done — go.mod exists and the alertmanager types are in internal/alertmanager/types.go.",
+      "expected_output": "Tests written first for naming function covering DNS sanitization, truncation, and edge cases. Then implementation in internal/proposal/naming.go. All acceptance criteria verified by running the test plan.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Let's implement the next task — task 002, the AlertManager client. Here's the task: implementation-planner/tasks/002-alertmanager-types-and-client.md. The project scaffolding from task 001 is already done.",
+      "expected_output": "Pre-implementation research on existing AlertManager Go client libraries. Tests written for FetchFiringAlerts covering success, errors, malformed data, empty list. Implementation with SA token auth and TLS. Latest dependency versions. Verification against all acceptance criteria.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Implement task 001 — project scaffolding. Task file: implementation-planner/tasks/001-project-scaffolding.md. Design doc: .ai/spec/initial-design.md. This is the first task, nothing exists yet.",
+      "expected_output": "No tests (scaffolding). go.mod initialized, directory structure created, minimal main.go, Makefile with required targets, multi-stage Dockerfile. Verified with go build, go vet, make build. Dependencies added and resolving.",
+      "files": []
+    }
+  ]
+}
