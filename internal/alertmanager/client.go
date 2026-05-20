@@ -16,7 +16,7 @@ import (
 
 const (
 	saTokenPath = "/var/run/secrets/kubernetes.io/serviceaccount/token"
-	saCAPath    = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+	saCAPath    = "/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt"
 )
 
 // Client wraps the AlertManager v2 API client to fetch firing alerts.
