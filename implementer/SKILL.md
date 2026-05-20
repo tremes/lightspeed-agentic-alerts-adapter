@@ -31,9 +31,31 @@ that only have one caller. Three similar lines are better than a premature
 abstraction. If the design doc says "constant for now, configurable later,"
 write a constant — don't build the configuration system.
 
+**Document the code.** Every exported type, function, method, and constant
+gets a doc comment. The comment should explain what it does and why a caller
+would use it — not restate the name. Unexported helpers get a comment when
+their purpose isn't obvious from the name and signature. Package-level doc
+comments are expected on every package. Well-documented code is a deliverable,
+not an afterthought.
+
 **Respect the codebase.** When the task builds on existing code, read it first.
 Match the naming conventions, error handling patterns, and project structure
 already in place. Integrate cleanly — don't introduce a new style.
+
+**Use modern idioms.** Write code that uses the latest stable features and
+conventions of the language. Prefer current standard-library APIs over
+deprecated ones or third-party replacements. When the language or its ecosystem
+has evolved its recommended patterns (test styles, error handling, module
+layouts), adopt them — code that reads like it was written three years ago
+signals neglect, even if it compiles.
+
+**Add meaningful logging.** Production code needs log messages at key decision
+points: when an operation starts and finishes, when a branch is taken that
+skips or alters normal flow, and when errors occur. Each log message should
+carry enough structured context (identifiers, counts, durations) that someone
+reading the logs can reconstruct what happened without the source code in
+front of them. Don't log inside tight loops or at a granularity that would
+flood output under normal operation — use debug level for high-frequency detail.
 
 **Verify everything.** After implementation, run the test plan and check every
 acceptance criterion. Verification against the original task is not optional.
@@ -78,7 +100,8 @@ existing libraries before writing custom code.
 Translate the test plan into actual test code. For each test case listed in the
 task:
 - Write a test function with a descriptive name
-- Use table-driven tests when there are multiple cases testing the same function
+- When there are multiple cases testing the same function, use the language's
+  current recommended pattern for parameterized or data-driven tests
 - Test the contract described in the task, not implementation details
 - Include the edge cases the task calls out explicitly
 
@@ -110,7 +133,9 @@ This is the most important step. Go through the acceptance criteria one by one:
 1. Run the test plan commands exactly as written in the task
 2. Check each acceptance criterion — is it actually satisfied?
 3. Run any validation commands the task specifies
-4. If the task says "go vet passes," run `go vet`. If it says "lint passes," run the linter.
+4. If the task says "go vet passes," run `go vet`. If it says "lint passes," run the linter
+5. Verify that all exported symbols have doc comments and that log messages
+   are present at key decision points in the production code
 
 If any criterion is not met, fix it before reporting the task as done.
 
