@@ -1,0 +1,25 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: lightspeed-agentic-alerts-adapter-proposals
+  labels:
+    app: lightspeed-agentic-alerts-adapter
+rules:
+  - apiGroups: ["agentic.openshift.io"]
+    resources: ["proposals"]
+    verbs: ["create", "list", "get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: lightspeed-agentic-alerts-adapter-proposals
+  labels:
+    app: lightspeed-agentic-alerts-adapter
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: lightspeed-agentic-alerts-adapter-proposals
+subjects:
+  - kind: ServiceAccount
+    name: lightspeed-agentic-alerts-adapter
+    namespace: openshift-lightspeed
