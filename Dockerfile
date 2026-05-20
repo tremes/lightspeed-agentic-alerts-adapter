@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi9/go-toolset:1.25 AS builder
+FROM registry.access.redhat.com/ubi9/go-toolset:1.26 AS builder
 
 WORKDIR /opt/app-root/src
 
@@ -6,7 +6,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
-RUN CGO_ENABLED=0 go build -o lightspeed-agentic-alerts-adapter ./cmd/alerts-adapter/
+RUN CGO_ENABLED=0 go build -buildvcs=false -o lightspeed-agentic-alerts-adapter ./cmd/alerts-adapter/
 
 FROM registry.access.redhat.com/ubi9/ubi-minimal:latest
 
