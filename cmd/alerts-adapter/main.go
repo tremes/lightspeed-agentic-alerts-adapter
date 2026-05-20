@@ -33,7 +33,7 @@ type config struct {
 
 func defaultConfig() config {
 	return config{
-		AlertManagerURL:  "https://alertmanager-main.openshift-monitoring.svc:9093",
+		AlertManagerURL:  envOrDefault("ALERTMANAGER_URL", "https://alertmanager-main.openshift-monitoring.svc:9094"),
 		PollInterval:     30 * time.Second,
 		InitialDelay:     5 * time.Minute,
 		CooldownWindow:   1 * time.Hour,
@@ -41,6 +41,13 @@ func defaultConfig() config {
 		DefaultAgent:     "default",
 		HealthPort:       ":8081",
 	}
+}
+
+func envOrDefault(key, fallback string) string {
+	if v := os.Getenv(key); v != "" {
+		return v
+	}
+	return fallback
 }
 
 // proposalClient implements poller.ProposalClient using a client-go REST client.

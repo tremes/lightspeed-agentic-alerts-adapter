@@ -102,7 +102,7 @@ func (p *Poller) Healthy() bool {
 // Run executes the poll loop until the context is cancelled.
 // Poll cycle errors are logged and retried on the next interval.
 func (p *Poller) Run(ctx context.Context) {
-	slog.Info("poller starting", "interval", p.pollInterval, "initialDelay", p.initialDelay, "cooldownWindow", p.cooldownWindow)
+	slog.Info("poller starting", "interval", p.pollInterval.String(), "initialDelay", p.initialDelay.String(), "cooldownWindow", p.cooldownWindow.String())
 	ticker := time.NewTicker(p.pollInterval)
 	defer ticker.Stop()
 
