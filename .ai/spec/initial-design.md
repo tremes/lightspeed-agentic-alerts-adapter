@@ -122,8 +122,6 @@ Examples:
 
 Components are sanitized to conform to DNS subdomain rules (RFC 1123): lowercased, non-alphanumeric characters replaced, truncated to fit the 253-character limit.
 
-If two poll cycles (or replicas in a future multi-replica setup) attempt to create the same Proposal concurrently, one succeeds and the other receives `409 Conflict (AlreadyExists)`. The adapter treats 409 as success.
-
 ### Alert to Proposal Mapping
 
 #### Proposal Name
@@ -221,9 +219,9 @@ When an alert resolves while its Proposal is still active (Analyzing, Executing,
 
 The adapter authenticates to the AlertManager API using the pod's auto-mounted ServiceAccount token:
 
-- **Endpoint**: `https://alertmanager-main.openshift-monitoring.svc:9093/api/v2/alerts`
+- **Endpoint**: `https://alertmanager-main.openshift-monitoring.svc:9094/api/v2/alerts`
 - **Authentication**: `Authorization: Bearer <ServiceAccount token>`
-- **TLS**: Verified against the cluster CA bundle (`/var/run/secrets/kubernetes.io/serviceaccount/ca.crt`)
+- **TLS**: Verified against the cluster CA bundle (`/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt`)
 
 The AlertManager URL is defined as a constant, with a path to make it configurable.
 
@@ -260,14 +258,6 @@ spec:
       containers:
         - name: adapter
           image: quay.io/openshift-lightspeed/lightspeed-agentic-alerts-adapter:latest
-          livenessProbe:
-            httpGet:
-              path: /healthz
-              port: 8081
-          readinessProbe:
-            httpGet:
-              path: /readyz
-              port: 8081
 ```
 
 Single replica is sufficient because:
@@ -328,28 +318,6 @@ subjects:
 |-------|------|----------|
 | Liveness | `/healthz` | Always returns 200 if the process is running. |
 | Readiness | `/readyz` | Returns 200 if the last poll cycle completed without critical errors (AlertManager reachable, K8s API reachable). |
-
-## Project Structure
-
-```
-lightspeed-agentic-alerts-adapter/
-├── cmd/
-│   └── main.go                      # Entrypoint: flags, signal handling, run loop
-├── internal/
-│   ├── alertmanager/
-│   │   ├── client.go                # AlertManager HTTP client (GET /api/v2/alerts)
-│   │   └── types.go                 # Alert response types
-│   ├── proposal/
-│   │   ├── builder.go               # Alert → Proposal mapping, template rendering
-│   │   └── naming.go                # Deterministic name generation, sanitization
-│   └── poller/
-│       └── poller.go                # Poll loop: fetch alerts, diff, create proposals
-├── Dockerfile
-├── Makefile
-├── go.mod
-├── go.sum
-└── OWNERS
-```
 
 ### Dependencies
 
