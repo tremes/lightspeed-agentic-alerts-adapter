@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lightspeed-agentic-alerts-adapter
+  namespace: openshift-lightspeed
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lightspeed-agentic-alerts-adapter
+  template:
+    metadata:
+      labels:
+        app: lightspeed-agentic-alerts-adapter
+    spec:
+      serviceAccountName: lightspeed-agentic-alerts-adapter
+      containers:
+        - name: adapter
+          image: quay.io/openshift-lightspeed/lightspeed-agentic-alerts-adapter:latest
+          ports:
+            - containerPort: 8080
+              name: health
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
