@@ -88,7 +88,7 @@ The adapter runs a single loop:
 
 ```
 every 30 seconds:
-    1. GET /api/v2/alerts → firing alerts
+    1. GET /api/v2/alerts?active=true&silenced=false&inhibited=false → firing alerts
     2. LIST Proposals (label: source=alertmanager) → existing proposals
     3. For each firing alert:
         a. now - alert.startsAt < INITIAL_DELAY?        → skip (too transient)
@@ -98,6 +98,8 @@ every 30 seconds:
 ```
 
 **Poll interval**: 30 seconds (constant). The initial delay dominates response latency, so the poll interval doesn't need to be aggressive.
+
+The query parameters ensure the adapter only processes alerts that are actively firing and not suppressed by AlertManager's silencing or inhibition rules.
 
 ### Deduplication
 
@@ -121,8 +123,6 @@ Examples:
 - `etcdhighfsyncdurations--f9e8d7c6` (no namespace for cluster-scoped alerts)
 
 Components are sanitized to conform to DNS subdomain rules (RFC 1123): lowercased, non-alphanumeric characters replaced, truncated to fit the 253-character limit.
-
-If two poll cycles (or replicas in a future multi-replica setup) attempt to create the same Proposal concurrently, one succeeds and the other receives `409 Conflict (AlreadyExists)`. The adapter treats 409 as success.
 
 ### Alert to Proposal Mapping
 
@@ -221,11 +221,21 @@ When an alert resolves while its Proposal is still active (Analyzing, Executing,
 
 The adapter authenticates to the AlertManager API using the pod's auto-mounted ServiceAccount token:
 
-- **Endpoint**: `https://alertmanager-main.openshift-monitoring.svc:9093/api/v2/alerts`
+- **Endpoint**: `https://alertmanager-main.openshift-monitoring.svc:9094/api/v2/alerts`
 - **Authentication**: `Authorization: Bearer <ServiceAccount token>`
 - **TLS**: Verified against the cluster CA bundle (`/var/run/secrets/kubernetes.io/serviceaccount/ca.crt`)
 
 The AlertManager URL is defined as a constant, with a path to make it configurable.
+
+### Logging
+
+The adapter uses Go's standard library `log/slog` package with JSON output. Log levels:
+
+| Level | What gets logged |
+|-------|-----------------|
+| `Info` | Poll cycle start/end, Proposal created (with alert name and namespace), adapter startup/shutdown |
+| `Error` | AlertManager unreachable, Kubernetes API errors, Proposal creation failures (non-409) |
+| `Debug` | Alerts skipped due to initial delay, existing Proposal, or cooldown window (including the skip reason and alert fingerprint) |
 
 ### Error Handling
 
@@ -260,20 +270,38 @@ spec:
       containers:
         - name: adapter
           image: quay.io/openshift-lightspeed/lightspeed-agentic-alerts-adapter:latest
-          livenessProbe:
-            httpGet:
-              path: /healthz
-              port: 8081
-          readinessProbe:
-            httpGet:
-              path: /readyz
-              port: 8081
 ```
 
 Single replica is sufficient because:
 - Stateless design handles restarts gracefully.
 - Polling catches up immediately after downtime.
 - Deterministic naming prevents duplicates even under concurrent execution.
+
+### Container Image
+
+The adapter is shipped as a container image built from a multi-stage `Containerfile` at the repository root.
+
+- **Builder stage**: Use the latest `registry.access.redhat.com/ubi9/go-toolset` image that provides Go 1.26. Compiles the binary with CGO disabled (`CGO_ENABLED=0`).
+- **Runtime stage**: `registry.access.redhat.com/ubi9/ubi-micro:latest`. The final image contains only the statically-linked binary.
+- **Binary name**: `alerts-adapter`
+- **Entrypoint**: `/alerts-adapter`
+
+The `Containerfile` must produce a functional image that can be built with `podman build` or `docker build`.
+
+### Manifests
+
+All Kubernetes resource definitions shown in this document must be created as deployable YAML files under a `manifests/` directory at the repository root:
+
+```
+manifests/
+├── deployment.yaml          # Deployment (single replica)
+├── serviceaccount.yaml      # ServiceAccount
+├── clusterrole.yaml         # ClusterRole for Proposal CRUD
+├── clusterrolebinding.yaml  # ClusterRoleBinding for Proposal CRUD
+└── clusterrolebinding-alertmanager.yaml  # ClusterRoleBinding for AlertManager access
+```
+
+These manifests are the deployable artifacts of the adapter. They must be complete, valid YAML that can be applied with `kubectl apply -f manifests/` against a cluster that has the Lightspeed Agentic operator installed.
 
 ### RBAC
 
@@ -356,7 +384,6 @@ lightspeed-agentic-alerts-adapter/
 | Dependency | Purpose |
 |-----------|---------|
 | `github.com/openshift/lightspeed-agentic-operator/api` | Typed Proposal CRD Go types |
-| `sigs.k8s.io/controller-runtime/pkg/client` | Typed Kubernetes client for Proposal CRUD |
 | `k8s.io/client-go` | In-cluster config, ServiceAccount auth |
 
 ## Configuration
@@ -368,7 +395,7 @@ All configurable values are Go constants in the initial implementation. Future i
 | `PollInterval` | `30 * time.Second` | How often to poll AlertManager |
 | `InitialDelay` | `5 * time.Minute` | Alert must fire this long before creating a Proposal |
 | `CooldownWindow` | `1 * time.Hour` | Minimum time after a terminal Proposal before re-proposing for the same alert |
-| `AlertManagerURL` | `https://alertmanager-main.openshift-monitoring.svc:9093` | AlertManager API base URL |
+| `AlertManagerURL` | `https://alertmanager-main.openshift-monitoring.svc:9094` | AlertManager API base URL |
 | `DefaultNamespace` | `openshift-lightspeed` | Namespace for Proposals from cluster-scoped alerts (no namespace label) |
 | `DefaultAgent` | `default` | Agent name for analysis, execution, and verification steps |
 
