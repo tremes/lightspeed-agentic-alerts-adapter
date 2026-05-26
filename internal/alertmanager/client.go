@@ -11,10 +11,10 @@ import (
 )
 
 const (
-	alertsPath   = "/api/v2/alerts"
-	alertsQuery  = "active=true&silenced=false&inhibited=false"
-	caPath       = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
-	tokenPath    = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+	alertsPath  = "/api/v2/alerts"
+	alertsQuery = "active=true&silenced=false&inhibited=false"
+	caPath      = "/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt"
+	tokenPath   = "/var/run/secrets/kubernetes.io/serviceaccount/token"
 )
 
 type Client struct {
