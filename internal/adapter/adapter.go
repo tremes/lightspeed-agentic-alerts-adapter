@@ -33,11 +33,19 @@ type SuspensionSource interface {
 	Suspended(ctx context.Context) (bool, error)
 }
 
+// Target is one independently reconciled cluster.
+type Target struct {
+	Name      string
+	Alerts    AlertSource
+	ARClient  AgenticRunClient
+	Namespace string
+}
+
 // Adapter polls AlertManager for firing alerts and creates AgenticRun CRs,
 // applying stateless deduplication (pre-run delay, active-run check,
 // and post-run delay) on each cycle.
 type Adapter struct {
-	alerts     AlertSource
+	targets    []Target
 	arClient   AgenticRunClient
 	suspension SuspensionSource
 	cfg        config.Config
@@ -47,13 +55,27 @@ type Adapter struct {
 
 // New creates an Adapter with the given alert source, run client,
 // suspension source, config, namespace, and logger.
-func New(alerts AlertSource, arClient AgenticRunClient, suspension SuspensionSource, cfg config.Config, namespace string, logger *slog.Logger) *Adapter {
+/*func New(alerts AlertSource, arClient AgenticRunClient, suspension SuspensionSource, cfg config.Config, namespace string, logger *slog.Logger) *Adapter {
 	return &Adapter{
 		alerts:     alerts,
 		arClient:   arClient,
 		suspension: suspension,
 		cfg:        cfg,
 		namespace:  namespace,
+		logger:     logger,
+
+	targets []Target
+	cfg     config.Config
+	logger  *slog.Logger
+}*/
+
+// New creates an Adapter with the given reconciliation targets, config, and logger.
+func New(targets []Target, arClient AgenticRunClient, suspension SuspensionSource, cfg config.Config, logger *slog.Logger) *Adapter {
+	return &Adapter{
+		targets:    targets,
+		arClient:   arClient,
+		suspension: suspension,
+		cfg:        cfg,
 		logger:     logger,
 	}
 }
@@ -96,15 +118,24 @@ func (a *Adapter) reconcile(ctx context.Context) {
 		return
 	}
 
-	alerts, err := a.alerts.GetAlerts(ctx)
+	for _, target := range a.targets {
+		if ctx.Err() != nil {
+			return
+		}
+		a.reconcileTarget(ctx, target)
+	}
+}
+
+func (a *Adapter) reconcileTarget(ctx context.Context, target Target) {
+	alerts, err := target.Alerts.GetAlerts(ctx)
 	if err != nil {
-		a.logger.Error("failed to get alerts", "error", err)
+		a.logger.Error("failed to get alerts", "target", target.Name, "error", err)
 		return
 	}
 
-	runs, err := a.arClient.ListAgenticRuns(ctx)
+	runs, err := target.ARClient.ListAgenticRuns(ctx)
 	if err != nil {
-		a.logger.Error("failed to list runs", "error", err)
+		a.logger.Error("failed to list runs", "target", target.Name, "error", err)
 		return
 	}
 
@@ -126,6 +157,7 @@ func (a *Adapter) reconcile(ctx context.Context) {
 
 		if skipReceiver(alert, a.cfg.AllowedReceivers) {
 			a.logger.Debug("alert skipped: no matching receiver",
+				"target", target.Name,
 				"alertname", alertName,
 				"fingerprint", fingerprint,
 				"receivers", receiverNames(alert),
@@ -136,6 +168,7 @@ func (a *Adapter) reconcile(ctx context.Context) {
 
 		if a.cfg.PreRunDelay > 0 && tooEarly(alert, now, a.cfg.PreRunDelay) {
 			a.logger.Debug("alert skipped: pre-run delay",
+				"target", target.Name,
 				"alertname", alertName,
 				"fingerprint", fingerprint,
 				"startsAt", alert.StartsAt,
@@ -149,6 +182,7 @@ func (a *Adapter) reconcile(ctx context.Context) {
 
 		if hasActiveRun(stableFP, runs) {
 			a.logger.Debug("alert skipped: active run exists",
+				"target", target.Name,
 				"alertname", alertName,
 				"fingerprint", fingerprint,
 			)
@@ -158,6 +192,7 @@ func (a *Adapter) reconcile(ctx context.Context) {
 
 		if a.cfg.PostRunDelay > 0 && tooRecent(stableFP, runs, now, a.cfg.PostRunDelay) {
 			a.logger.Debug("alert skipped: post-run delay",
+				"target", target.Name,
 				"alertname", alertName,
 				"fingerprint", fingerprint,
 				"postRunDelay", a.cfg.PostRunDelay,
@@ -166,9 +201,10 @@ func (a *Adapter) reconcile(ctx context.Context) {
 			continue
 		}
 
-		p, err := agenticrun.Build(alert, a.cfg.Tools, a.cfg.Agent, a.cfg.IgnoredLabels, a.namespace)
+		p, err := agenticrun.Build(alert, a.cfg.Tools, a.cfg.Agent, a.cfg.IgnoredLabels, target.Namespace)
 		if err != nil {
 			a.logger.Error("failed to build run",
+				"target", target.Name,
 				"alertname", alertName,
 				"fingerprint", fingerprint,
 				"error", err,
@@ -180,9 +216,10 @@ func (a *Adapter) reconcile(ctx context.Context) {
 			p.Name = agenticrun.NextAvailableName(p.Name, runNames(runs))
 		}
 
-		wasCreated, err := a.arClient.CreateAgenticRun(ctx, p)
+		wasCreated, err := target.ARClient.CreateAgenticRun(ctx, p)
 		if err != nil {
 			a.logger.Error("failed to create run",
+				"target", target.Name,
 				"alertname", alertName,
 				"fingerprint", fingerprint,
 				"run", p.Name,
@@ -194,6 +231,7 @@ func (a *Adapter) reconcile(ctx context.Context) {
 		if wasCreated {
 			runs = append(runs, *p)
 			a.logger.Info("run created",
+				"target", target.Name,
 				"alertname", alertName,
 				"fingerprint", fingerprint,
 				"run", p.Name,
@@ -203,6 +241,7 @@ func (a *Adapter) reconcile(ctx context.Context) {
 	}
 
 	a.logger.Info("poll cycle complete",
+		"target", target.Name,
 		"alertsTotal", len(alerts),
 		"skipped", skipped,
 		"created", created,
