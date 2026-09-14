@@ -91,8 +91,9 @@ func testAdapter(as AlertSource, rc AgenticRunClient, cfg config.Config) *Adapte
 			ARClient:  rc,
 			Namespace: agenticrun.RunNamespace,
 		}},
-		cfg:    cfg,
-		logger: quietLogger(),
+		suspension: &fakeSuspensionSource{},
+		cfg:        cfg,
+		logger:     quietLogger(),
 	}
 }
 
@@ -700,7 +701,12 @@ func TestReconcileTargets(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			a := &Adapter{targets: tt.targets, cfg: defaultTestConfig(), logger: quietLogger()}
+			a := &Adapter{
+				targets:    tt.targets,
+				suspension: &fakeSuspensionSource{},
+				cfg:        defaultTestConfig(),
+				logger:     quietLogger(),
+			}
 			a.reconcile(context.Background())
 
 			for _, target := range tt.targets {
@@ -773,11 +779,14 @@ func TestReconcileSkipsCycleForSuspensionState(t *testing.T) {
 			ss := &fakeSuspensionSource{suspended: tt.suspended, err: tt.err}
 
 			a := &Adapter{
-				alerts:     as,
-				arClient:   rc,
+				targets: []Target{{
+					Name:      "local",
+					Alerts:    as,
+					ARClient:  rc,
+					Namespace: agenticrun.RunNamespace,
+				}},
 				suspension: ss,
 				cfg:        defaultTestConfig(),
-				namespace:  agenticrun.RunNamespace,
 				logger:     quietLogger(),
 			}
 

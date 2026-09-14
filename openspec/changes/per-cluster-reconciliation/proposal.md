@@ -8,7 +8,7 @@ The adapter currently combines alerts from the local cluster and every configure
 - Read the `hub.openshift.io/alert-credential-secret` label from each SpokeCluster and load the named Secret from the adapter namespace.
 - Query each remote Alertmanager using the Secret's `alertmanager-url`, `token`, and `ca-bundle` data values.
 - Retrieve a target's alerts, list the hub's Alertmanager-created AgenticRuns for that target identity, apply the existing filtering and deduplication rules to that target only, and create eligible AgenticRuns on the hub cluster.
-- Preserve local-only behavior when no SpokeCluster has the credential Secret label.
+- Preserve local-only behavior when the SpokeCluster CRD is not installed or no SpokeCluster has the credential Secret label.
 - Use target-scoped reconciliation so one target failure does not prevent healthy targets from being reconciled.
 - Label hub-created AgenticRuns with the related SpokeCluster name so hub-side deduplication remains isolated per target.
 

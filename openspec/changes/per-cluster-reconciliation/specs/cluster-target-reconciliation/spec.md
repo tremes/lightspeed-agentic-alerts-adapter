@@ -11,6 +11,10 @@ The system SHALL always configure a local reconciliation target. It SHALL list c
 - **WHEN** no SpokeCluster bears the `hub.openshift.io/alert-credential-secret` label
 - **THEN** the system SHALL reconcile only the local cluster using existing in-cluster behavior
 
+#### Scenario: SpokeCluster CRD is not installed
+- **WHEN** the cluster does not serve the `hub.openshift.io/v1alpha1` `SpokeCluster` resource
+- **THEN** the system SHALL reconcile only the local cluster using existing in-cluster behavior
+
 #### Scenario: Multiple SpokeClusters are configured
 - **WHEN** multiple SpokeClusters bear the `hub.openshift.io/alert-credential-secret` label
 - **THEN** the system SHALL configure one independent spoke target for each labeled SpokeCluster

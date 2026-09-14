@@ -19,7 +19,7 @@
 
 ## 4. Validation
 
-- [ ] 4.1 Add target-construction tests covering SpokeCluster discovery, label filtering, valid credential Secrets including `ca-bundle`, and malformed or unavailable credential Secrets.
+- [ ] 4.1 Add target-construction tests covering SpokeCluster discovery, an absent SpokeCluster CRD, label filtering, valid credential Secrets including `ca-bundle`, and malformed or unavailable credential Secrets.
 - [x] 4.2 Add Alertmanager-client tests covering bearer tokens supplied directly through client configuration and trusted/untrusted credential-Secret CA-bundle TLS certificates.
 - [x] 4.3 Run `make fmt` and `make test`; verify both commands complete successfully.
 - [x] 4.4 Deploy with a labeled SpokeCluster and verify an eligible remote alert creates a SpokeCluster-name-labeled AgenticRun in the hub `openshift-lightspeed` namespace.

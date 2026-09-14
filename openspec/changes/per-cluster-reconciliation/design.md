@@ -21,9 +21,11 @@ See proposal.md for motivation. The adapter reconciles an alert source with the 
 
 ### Discover spoke targets from SpokeClusters
 
-At startup, list cluster-scoped `hub.openshift.io/v1alpha1` `SpokeCluster` resources. For every resource with the `hub.openshift.io/alert-credential-secret` label, construct one spoke target. The label value names the credential Secret in the adapter namespace.
+At startup, list cluster-scoped `hub.openshift.io/v1alpha1` `SpokeCluster` resources. If the SpokeCluster CRD is not installed, retain only the local target. For every resource with the `hub.openshift.io/alert-credential-secret` label, construct one spoke target. The label value names the credential Secret in the adapter namespace.
 
 This makes the hub's SpokeCluster inventory the source of spoke target configuration, rather than maintaining a separate comma-separated environment variable. The adapter uses an unstructured list because it does not otherwise depend on a Go type for the SpokeCluster API.
+
+Treating an absent CRD as no configured spokes preserves local-only deployments. Other SpokeCluster list failures remain startup errors because they can hide configured spoke targets.
 
 ### Read Alertmanager credentials from a hub Secret
 
@@ -51,7 +53,7 @@ Every target uses the existing hub controller-runtime client and the hub `opensh
 
 ## Risks / Trade-offs
 
-- [The adapter cannot list SpokeClusters] → Require a ClusterRole that grants `list` on `hub.openshift.io/spokeclusters`.
+- [The SpokeCluster CRD is installed but the adapter cannot list SpokeClusters] → Require a ClusterRole that grants `list` on `hub.openshift.io/spokeclusters`.
 - [A referenced credential Secret is unavailable or malformed] → Log the SpokeCluster-specific initialization failure and continue with remaining targets.
 - [A remote Alertmanager certificate is not trusted by the credential Secret's CA bundle] → Provide the issuing CA in the Secret's `ca-bundle` value; TLS verification remains enabled.
 - [A credential token rotates or is revoked] → Restart the adapter after updating the credential Secret.

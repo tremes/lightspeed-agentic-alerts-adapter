@@ -46,34 +46,15 @@ type Target struct {
 // and post-run delay) on each cycle.
 type Adapter struct {
 	targets    []Target
-	arClient   AgenticRunClient
 	suspension SuspensionSource
 	cfg        config.Config
-	namespace  string
 	logger     *slog.Logger
 }
 
-// New creates an Adapter with the given alert source, run client,
-// suspension source, config, namespace, and logger.
-/*func New(alerts AlertSource, arClient AgenticRunClient, suspension SuspensionSource, cfg config.Config, namespace string, logger *slog.Logger) *Adapter {
-	return &Adapter{
-		alerts:     alerts,
-		arClient:   arClient,
-		suspension: suspension,
-		cfg:        cfg,
-		namespace:  namespace,
-		logger:     logger,
-
-	targets []Target
-	cfg     config.Config
-	logger  *slog.Logger
-}*/
-
 // New creates an Adapter with the given reconciliation targets, config, and logger.
-func New(targets []Target, arClient AgenticRunClient, suspension SuspensionSource, cfg config.Config, logger *slog.Logger) *Adapter {
+func New(targets []Target, suspension SuspensionSource, cfg config.Config, logger *slog.Logger) *Adapter {
 	return &Adapter{
 		targets:    targets,
-		arClient:   arClient,
 		suspension: suspension,
 		cfg:        cfg,
 		logger:     logger,

@@ -10,6 +10,7 @@ import (
 
 	agenticv1alpha1 "github.com/openshift/lightspeed-agentic-operator/api/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -106,7 +107,7 @@ func newClientForConfig(cfg *rest.Config) (client.Client, error) {
 // newTargets returns the local target followed by one target for each labeled
 // SpokeCluster whose credential Secret can be loaded and parsed. It returns an
 // error if the local Alertmanager client cannot be created or SpokeClusters
-// cannot be listed.
+// cannot be listed for a reason other than the SpokeCluster CRD being absent.
 func newTargets(ctx context.Context, k8sClient client.Client, namespace string, logger *slog.Logger) ([]adapter.Target, error) {
 	local, err := alertmanager.New(alertmanager.Config{
 		URL: os.Getenv("ALERTMANAGER_URL"),
@@ -125,6 +126,10 @@ func newTargets(ctx context.Context, k8sClient client.Client, namespace string, 
 	var spokeClusters unstructured.UnstructuredList
 	spokeClusters.SetGroupVersionKind(spokeClusterListGVK)
 	if err := k8sClient.List(ctx, &spokeClusters); err != nil {
+		if meta.IsNoMatchError(err) {
+			logger.Info("SpokeCluster CRD is not installed; skipping spoke targets")
+			return targets, nil
+		}
 		return nil, fmt.Errorf("listing spoke clusters: %w", err)
 	}
 
