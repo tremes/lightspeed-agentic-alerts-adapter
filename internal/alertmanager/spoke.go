@@ -133,7 +133,9 @@ func (c *SpokeClient) GetAlerts(ctx context.Context) (models.GettableAlerts, err
 	if err != nil {
 		return nil, fmt.Errorf("alertmanager: querying route: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
 		body, _ := io.ReadAll(io.LimitReader(resp.Body, 4096))
